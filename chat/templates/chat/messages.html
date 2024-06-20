@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>ChatApp</title>
+    {% load static %}
+    <link href="{% static 'style.css' %}" rel="stylesheet" />
+</head>
+<body>
+    <nav class="nav-menu">
+        <ul class="nav-ul">
+            {% if user.is_authenticated %}
+                <li class="nav-li">
+                    <a class="nav-link" id="username" href="{% url 'profile' %}"> account {{ user.username }} </a>
+                </li>
+                <li class="nav-li">
+                    <a class="nav-link" href="/chat/{{ user.account.user_uuid }}">my room</a>
+                </li>
+                <li>
+                    <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="nav-button" type="submit">logout</button>
+                    </form>
+                </li>
+                {% if user.is_superuser %}
+                <li class="nav-li">
+                    <a class="nav-link" href="{% url 'room-list' %}">api</a>
+                </li>
+                {% endif %}
+            {% endif %}
+        </ul>
+    </nav>
+    {% block content %}
+    {% endblock content %}
+</body>
+    <footer class="footer">
+        <a class="footer-link" href="https://github.com/FirstEncounter3">FirstEncounter3</a>
+    </footer>
+</html>

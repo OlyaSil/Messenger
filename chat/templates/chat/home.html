@@ -1,0 +1,21 @@
+<!-- templates/chat/home.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Home</title>
+</head>
+<body>
+    <h2>Welcome to the Chat</h2>
+    <p>Hello, {{ user.username }}!</p>
+    <a href="{% url 'logout' %}">Logout</a>
+
+    <h3>Available Group Chats</h3>
+    <ul>
+        {% for group in groups %}
+            <li><a href="{% url 'group_chat' group.id %}">{{ group.name }}</a></li>
+        {% empty %}
+            <li>No group chats available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
