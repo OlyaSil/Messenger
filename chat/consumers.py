@@ -3,6 +3,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import Message, GroupChat
 from django.contrib.auth.models import User
 from django.utils import timezone
+from asgiref.sync import sync_to_async
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -31,8 +33,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user = self.scope["user"]
 
         # Save message to database
-        group = GroupChat.objects.get(name=self.room_name)
-        msg = Message.objects.create(
+        group = await sync_to_async(GroupChat.objects.get)(name=self.room_name)
+        msg = await sync_to_async(Message.objects.create)(
             group=group,
             sender=user,
             content=message,

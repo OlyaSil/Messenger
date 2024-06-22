@@ -13,10 +13,11 @@
     <button id="chat-message-submit">Send</button>
 
     <script>
-        const groupName = "{{ group.name }}";  // Replace with dynamic group name
+        const groupName = "{{ group.name }}";  // Use Django template to dynamically set the group name
 
+        // Create WebSocket connection using the dynamically set group name
         const chatSocket = new WebSocket(
-            'ws://' + window.location.host + '/ws/chat/' + encodeURIComponent(groupName) + '/'
+            `ws://${window.location.host}/ws/chat/${encodeURIComponent(groupName)}/`
         );
 
         chatSocket.onmessage = function(e) {
@@ -24,28 +25,29 @@
             const chatLog = document.getElementById('chat-log');
             const messageElement = document.createElement('div');
 
+            // Create a formatted message element
             const timestamp = new Date(data.timestamp);
             messageElement.innerHTML = `<strong>${data.email}</strong>: ${data.message} <small>${timestamp.toLocaleString()}</small>`;
-            chatLog.appendChild(messageElement);
+            chatLog.appendChild(messageElement); // Append the message element to the chat log
         };
 
         chatSocket.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly');
+            console.error('Chat socket closed unexpectedly', e); // Log unexpected closure
         };
 
+        // Trigger sending message when Enter key is pressed
         document.querySelector('#chat-message-input').onkeyup = function(e) {
-            if (e.keyCode === 13) {  // Enter key is pressed
+            if (e.keyCode === 13) {  // Enter key
                 document.querySelector('#chat-message-submit').click();
             }
         };
 
+        // Send message when the send button is clicked
         document.querySelector('#chat-message-submit').onclick = function(e) {
             const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value;
-            chatSocket.send(JSON.stringify({
-                'message': message
-            }));
-            messageInputDom.value = '';  // Clear input after sending
+            const message = messageInputDom.value; // Get the input message
+            chatSocket.send(JSON.stringify({ 'message': message })); // Send the message as JSON
+            messageInputDom.value = '';  // Clear the input after sending
         };
     </script>
 </body>

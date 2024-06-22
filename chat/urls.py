@@ -10,5 +10,5 @@ router.register(r'users', UserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('group/<int:group_id>/', group_chat, name='group_chat'),
+    path('chat/<str:group_identifier>/', group_chat, name='group_chat'),
 ]
