@@ -1,3 +1,4 @@
+# views.py
 from rest_framework import viewsets, permissions
 from .models import GroupChat, Message, UserProfile
 from .serializers import GroupChatSerializer, MessageSerializer, UserProfileSerializer, UserSerializer
@@ -7,7 +8,10 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import Http404
-
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .forms import *
 
 class GroupChatViewSet(viewsets.ModelViewSet):
     queryset = GroupChat.objects.all()
@@ -49,14 +53,43 @@ def home(request):
 @login_required
 def group_chat(request, group_identifier):
     try:
-        # Сначала пытаемся интерпретировать идентификатор как целое число и искать по pk
-        group_id = int(group_identifier)
-        group = get_object_or_404(GroupChat, pk=group_id)
+        group = get_object_or_404(GroupChat, pk=group_identifier)
     except ValueError:
-        # Если это не число, ищем по имени
         group = get_object_or_404(GroupChat, name=group_identifier)
     except GroupChat.DoesNotExist:
-        # Если группа не найдена, возвращаем 404
         raise Http404("No GroupChat matches the given query.")
 
     return render(request, 'chat/group_chat.html', {'group': group})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_messages(request, group_identifier):
+    try:
+        group = GroupChat.objects.get(name=group_identifier)
+        messages = Message.objects.filter(group=group).order_by('timestamp')
+        serializer = MessageSerializer(messages, many=True)
+        return Response(serializer.data)
+    except GroupChat.DoesNotExist:
+        return Response({'error': 'Group does not exist'}, status=404)
+
+@login_required
+def edit_profile(request):
+    user = request.user
+    profile, created = UserProfile.objects.get_or_create(user=user)
+
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile was successfully updated!')
+            return redirect('home')
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = UserProfileForm(instance=profile)
+
+    return render(request, 'chat/edit_profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form
+    })

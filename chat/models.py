@@ -18,7 +18,7 @@ class Message(models.Model):
         return self.content
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='userprofile')
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
 

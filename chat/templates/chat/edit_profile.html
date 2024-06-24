@@ -1,0 +1,18 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Profile</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'chat/css/styles.css' %}">
+</head>
+<body>
+    <h2>Edit Profile</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ user_form.as_p }}
+        {{ profile_form.as_p }}
+        <button type="submit">Save changes</button>
+    </form>
+    <a href="{% url 'home' %}">Home</a>
+</body>
+</html>

@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,43 +10,55 @@
     <div id="chat-log"></div>
     <input id="chat-message-input" type="text" size="100">
     <button id="chat-message-submit">Send</button>
+    <button onclick="window.location.href='{% url 'home' %}'">Home</button>
 
     <script>
-        const groupName = "{{ group.name }}";  // Use Django template to dynamically set the group name
+        const groupName = "{{ group.name }}";
 
-        // Create WebSocket connection using the dynamically set group name
+        function displayMessage(data) {
+            const chatLog = document.getElementById('chat-log');
+            const messageElement = document.createElement('div');
+            const timestamp = new Date(data.timestamp);
+            let avatarHtml = '';
+            if (data.avatar) {
+                avatarHtml = `<img src="${data.avatar}" alt="avatar" style="width:50px;height:50px;"> `;
+            }
+            messageElement.innerHTML = `${avatarHtml}<strong>${data.username}</strong>: ${data.message} <small>${timestamp.toLocaleString()}</small>`;
+            chatLog.appendChild(messageElement);
+        }
+
         const chatSocket = new WebSocket(
             `ws://${window.location.host}/ws/chat/${encodeURIComponent(groupName)}/`
         );
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            const chatLog = document.getElementById('chat-log');
-            const messageElement = document.createElement('div');
-
-            // Create a formatted message element
-            const timestamp = new Date(data.timestamp);
-            messageElement.innerHTML = `<strong>${data.email}</strong>: ${data.message} <small>${timestamp.toLocaleString()}</small>`;
-            chatLog.appendChild(messageElement); // Append the message element to the chat log
+            displayMessage(data);
         };
 
         chatSocket.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly', e); // Log unexpected closure
+            console.error('Chat socket closed unexpectedly', e);
         };
 
-        // Trigger sending message when Enter key is pressed
         document.querySelector('#chat-message-input').onkeyup = function(e) {
-            if (e.keyCode === 13) {  // Enter key
+            if (e.keyCode === 13) {
                 document.querySelector('#chat-message-submit').click();
             }
         };
 
-        // Send message when the send button is clicked
         document.querySelector('#chat-message-submit').onclick = function(e) {
             const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value; // Get the input message
-            chatSocket.send(JSON.stringify({ 'message': message })); // Send the message as JSON
-            messageInputDom.value = '';  // Clear the input after sending
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({ 'message': message }));
+            messageInputDom.value = '';
+        };
+
+        window.onload = function() {
+            fetch(`/api/messages/${encodeURIComponent(groupName)}/`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(displayMessage);
+                });
         };
     </script>
 </body>
