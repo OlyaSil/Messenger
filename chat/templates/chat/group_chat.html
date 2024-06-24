@@ -1,16 +1,39 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>{{ group.name }}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'chat/css/styles.css' %}">
+    <style>
+        #members-list {
+            float: right;
+            width: 200px;
+            padding: 10px;
+            border-left: 1px solid #ccc;
+        }
+        #chat-container {
+            margin-right: 220px;
+        }
+        .member {
+            margin-bottom: 10px;
+        }
+        .member img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+    </style>
 </head>
 <body>
     <h2>{{ group.name }}</h2>
-    <div id="chat-log"></div>
-    <input id="chat-message-input" type="text" size="100">
-    <button id="chat-message-submit">Send</button>
-    <button onclick="window.location.href='{% url 'home' %}'">Home</button>
+    <div id="members-list"></div>
+    <div id="chat-container">
+        <div id="chat-log"></div>
+        <input id="chat-message-input" type="text" size="100">
+        <button id="chat-message-submit">Send</button>
+        <button onclick="window.location.href='{% url 'home' %}'">Home</button>
+    </div>
 
     <script>
         const groupName = "{{ group.name }}";
@@ -25,6 +48,18 @@
             }
             messageElement.innerHTML = `${avatarHtml}<strong>${data.username}</strong>: ${data.message} <small>${timestamp.toLocaleString()}</small>`;
             chatLog.appendChild(messageElement);
+        }
+
+        function displayMember(member) {
+            const membersList = document.getElementById('members-list');
+            const memberElement = document.createElement('div');
+            memberElement.className = 'member';
+            let avatarHtml = '';
+            if (member.avatar) {
+                avatarHtml = `<img src="${member.avatar}" alt="avatar"> `;
+            }
+            memberElement.innerHTML = `${avatarHtml}<strong>${member.username}</strong><p>${member.bio}</p>`;
+            membersList.appendChild(memberElement);
         }
 
         const chatSocket = new WebSocket(
@@ -58,6 +93,12 @@
                 .then(response => response.json())
                 .then(data => {
                     data.forEach(displayMessage);
+                });
+
+            fetch(`/api/group_members/${encodeURIComponent(groupName)}/`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(displayMember);
                 });
         };
     </script>

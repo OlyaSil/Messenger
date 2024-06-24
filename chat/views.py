@@ -93,3 +93,21 @@ def edit_profile(request):
         'user_form': user_form,
         'profile_form': profile_form
     })
+
+@api_view(['GET'])
+def get_group_members(request, group_identifier):
+    try:
+        group = GroupChat.objects.get(name=group_identifier)
+        members = group.members.all()
+        members_data = []
+        for member in members:
+            profile = UserProfile.objects.get(user=member)
+            members_data.append({
+                'username': member.username,
+                'email': member.email,
+                'avatar': profile.avatar.url if profile.avatar else '',
+                'bio': profile.bio,
+            })
+        return Response(members_data)
+    except GroupChat.DoesNotExist:
+        return Response({'error': 'Group does not exist'}, status=404)

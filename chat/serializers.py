@@ -2,18 +2,13 @@ from rest_framework import serializers
 from .models import GroupChat, Message, UserProfile
 from django.contrib.auth.models import User
 
-class GroupChatSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GroupChat
-        fields = '__all__'
-
-
 class UserSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(source='userprofile.avatar', read_only=True)
+    bio = serializers.CharField(source='userprofile.bio', read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'avatar']
+        fields = ['id', 'username', 'email', 'avatar', 'bio']
 
 class MessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True)
@@ -44,8 +39,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         return instance
 
-    avatar = serializers.ImageField(read_only=True)
+class GroupChatSerializer(serializers.ModelSerializer):
+    members = UserSerializer(many=True, read_only=True)
 
     class Meta:
-        model = UserProfile
-        fields = ['avatar']
+        model = GroupChat
+        fields = ['id', 'name', 'members']
