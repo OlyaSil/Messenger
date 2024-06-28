@@ -36,6 +36,5 @@ function initializeWebSocket(groupName) {
     return chatSocket;
 }
 
-// Инициализируем соединения для каждой группы
 const everyoneButOneSocket = initializeWebSocket("EveryoneButOne");
 const checkingTheVibesSocket = initializeWebSocket("CheckingTheVibes");

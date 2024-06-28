@@ -13,7 +13,7 @@ urlpatterns = [
     path('chat/<str:group_identifier>/', group_chat, name='group_chat'),
     path('api/messages/<str:group_identifier>/', get_messages, name='get_messages'),
     path('edit_profile/', edit_profile, name='edit_profile'),
-    path('api/group_members/<str:group_identifier>/', get_group_members, name='get_group_members'),
+    path('api/group_members/<str:group_identifier>/', get_group_members, name='get_group_members'),  # Этот маршрут должен быть зарегистрирован
 ]
 
 urlpatterns += router.urls

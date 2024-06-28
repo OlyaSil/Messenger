@@ -12,4 +12,7 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(template_name='chat/logout.html'), name='logout'),
     path('register/', chat_views.register, name='register'),
     path('', chat_views.home, name='home'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

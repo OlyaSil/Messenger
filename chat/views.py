@@ -1,8 +1,6 @@
-# views.py
 from rest_framework import viewsets, permissions
 from .models import GroupChat, Message, UserProfile
 from .serializers import GroupChatSerializer, MessageSerializer, UserProfileSerializer, UserSerializer
-from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
@@ -10,7 +8,6 @@ from django.contrib import messages
 from django.http import Http404
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from .forms import *
 
 class GroupChatViewSet(viewsets.ModelViewSet):
@@ -58,11 +55,9 @@ def group_chat(request, group_identifier):
         group = get_object_or_404(GroupChat, name=group_identifier)
     except GroupChat.DoesNotExist:
         raise Http404("No GroupChat matches the given query.")
-
     return render(request, 'chat/group_chat.html', {'group': group})
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def get_messages(request, group_identifier):
     try:
         group = GroupChat.objects.get(name=group_identifier)
@@ -99,15 +94,7 @@ def get_group_members(request, group_identifier):
     try:
         group = GroupChat.objects.get(name=group_identifier)
         members = group.members.all()
-        members_data = []
-        for member in members:
-            profile = UserProfile.objects.get(user=member)
-            members_data.append({
-                'username': member.username,
-                'email': member.email,
-                'avatar': profile.avatar.url if profile.avatar else '',
-                'bio': profile.bio,
-            })
+        members_data = [{'username': member.username, 'email': member.email} for member in members]
         return Response(members_data)
     except GroupChat.DoesNotExist:
         return Response({'error': 'Group does not exist'}, status=404)

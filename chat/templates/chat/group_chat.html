@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -54,11 +53,7 @@
             const membersList = document.getElementById('members-list');
             const memberElement = document.createElement('div');
             memberElement.className = 'member';
-            let avatarHtml = '';
-            if (member.avatar) {
-                avatarHtml = `<img src="${member.avatar}" alt="avatar"> `;
-            }
-            memberElement.innerHTML = `${avatarHtml}<strong>${member.username}</strong><p>${member.bio}</p>`;
+            memberElement.innerHTML = `<strong>${member.username}</strong>`;
             membersList.appendChild(memberElement);
         }
 
